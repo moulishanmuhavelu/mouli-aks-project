@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-image-deployment
+  labels:
+    app: web-image
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-image
+  template:
+    metadata:
+      labels:
+        app: web-image
+    spec:
+      containers:
+      - name: web-image
+        image: web-image:v1
+        ports:
+        - containerPort: 80

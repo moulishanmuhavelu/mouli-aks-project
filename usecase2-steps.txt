@@ -1,0 +1,66 @@
+1) Enable Kubernetes and restart Docker Desktop
+2) Create a file named index.html and put some html text there
+3) Create a file named Dockerfile. It should have the instructions to download the nginx image and copy the index.html file that was created
+4) Build the docker image using the Dockerfile and tag it.
+   
+   > docker build -t web-image:v1 .
+   > docker images
+   > docker run -d -p 8080:80 --name mynginx web-image:v1
+   > curl -v localhost:8080
+
+5) Create a pod definition file and use this image and execute these commands
+   > kubectl apply -f pod-def.yml
+   > kubectl get pods
+
+6) Create a deployment definition file and use this image and execute these commands
+   > kubectl apply -f deploy-def.yml
+   > kubectl get deploy
+
+7) Create a service definition file and use this image and execute these commands
+   > kubectl apply -f service-def.yml
+   > kubectl get svc
+   > curl -v localhost:30225
+
+
+Setting up Azure Container Registry
+-----------------------------------
+1) Create Resourcegroup 
+      > az group create --name moulirg --location westeurope
+2) Create Azure Container Registry 
+      > az acr create --resource-group moulirg --name moulisacr --sku Basic
+3) Login to ACR
+      > az acr login --name moulisacr
+4) Tag the image for the ACR
+      > docker images
+      > az acr list --resource-group moulirg --query "[].{acrLoginServer:loginServer}" --output table
+         -- output will be moulisacr.azurecr.io
+      > docker tag web-image:v1 moulisacr.azurecr.io/web-image:v1
+5) Push the image to ACR
+      > docker push moulisacr.azurecr.io/web-image:v1
+6) List images in ACR 
+      > az acr repository list --name moulisacr --output table
+
+Setting up Kubernetes Cluster
+-----------------------------------
+1) Create Kubernetes Cluster
+   > az aks create \
+    --resource-group moulirg \
+    --name moulisaks \
+    --node-count 2 \
+    --generate-ssh-keys \
+    --attach-acr moulisacr
+
+2) Install kubernetes CLI
+   > az aks install-cli
+
+3) Connect to cluster using kubectl
+   > az aks get-credentials --resource-group moulirg --name moulisaks
+
+4) Verify the connection
+   > kubectl get nodes
+
+5) Run the application
+   > kubectl apply -f nginx-aks-deployment.yml 
+
+6) Test the application by hitting the load balancer Ip given under external column
+   

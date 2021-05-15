@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web-image
+  labels:
+    app: web-image
+spec:
+  containers:
+    - name: web-image
+      image: web-image:v1
+      ports:
+        - name: web
+          containerPort: 80
+          protocol: TCP
